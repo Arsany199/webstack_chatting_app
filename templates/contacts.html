@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Contacts</title>
+</head>
+<body>
+    <h1>Contacts</h1>
+    <p>Logged in as: {{ username }}</p>
+    <ul>
+        {% for contact in contacts %}
+            <li><a href="{{ url_for('chat', contact_user=contact.username) }}">Chat with {{ contact.username }}</a></li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>
