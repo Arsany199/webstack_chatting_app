@@ -26,34 +26,43 @@
         const socket = io();  // Initialize SocketIO
 
         function sendMessage() {
-        const message = document.getElementById('message').value;
-        if (message.trim() === '') return; // Prevent sending empty messages
+            const message = document.getElementById('message').value;
+            if (message.trim() === '') return; // Prevent sending empty messages
 
-        // Display the message in the chatbox
-        const chatbox = document.getElementById('chatbox');
-        const messageElement = document.createElement('div');
-        messageElement.className = 'message';
-        messageElement.textContent = `You: ${message}`;  // Only show "You:" for sent messages
-        chatbox.appendChild(messageElement);
+            // Emit message to the server
+            socket.emit('send_message', {
+                msg: message,
+                user: '{{ contact_user }}',  // This should be the username of the contact you are chatting with
+                sender: '{{ current_user.username }}'  // Add the current user's username
+            });
 
-        // Emit message to the server
-        socket.emit('send_message', {
-            msg: message,
-            user: '{{ contact_user }}'  // Replace this with the appropriate user
+            // Display the message in the chatbox
+            const chatbox = document.getElementById('chatbox');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+            messageElement.textContent = `You: ${message}`;  // Show "You:" for sent messages
+            chatbox.appendChild(messageElement);
+
+            // Clear the input field
+            document.getElementById('message').value = '';
+        }
+
+        // Receive messages from the server
+        socket.on('receive_message', function(data) {
+            const chatbox = document.getElementById('chatbox');
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+
+            // Display the message according to the sender
+            if (data.sender === '{{ current_user.username }}') {
+                // This is an outgoing message, do not display it again.
+                return;
+            } else {
+                messageElement.textContent = `${data.sender}: ${data.msg}`;  // Show the sender's username
+            }
+
+            chatbox.appendChild(messageElement);
         });
-
-        // Clear the input field
-        document.getElementById('message').value = '';
-    }
-
-    // Receive messages from the server
-    socket.on('receive_message', function(data) {
-        const chatbox = document.getElementById('chatbox');
-        const messageElement = document.createElement('div');
-        messageElement.className = 'message';
-        messageElement.textContent = `${data.user}: ${data.msg}`;  // Show the sender's username
-        chatbox.appendChild(messageElement);
-    });
     </script>
 </body>
 </html>
